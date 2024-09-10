@@ -89,3 +89,36 @@ def update_count(request):
     else:
         return JsonResponse({'code': -1, 'errorMsg': 'action参数错误'},
                     json_dumps_params={'ensure_ascii': False})
+
+def weather(request, _):
+    """
+    获取地址对应的天气
+    """
+    rsp = JsonResponse({'code': 0, 'errorMsg': ''}, json_dumps_params={'ensure_ascii': False})
+    if request.method == 'GET' or request.method == 'get':
+        rsp = get_weather(request)
+    else:
+        rsp = JsonResponse({'code': -1, 'errorMsg': '请求方式错误'},
+                           json_dumps_params={'ensure_ascii': False})
+    logger.info('response result: {}'.format(rsp.content.decode('utf-8')))
+    return rsp
+
+
+def get_weather(request):
+
+    logger.info('update_count req: {}'.format(request.body))
+
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    if 'location' not in body:
+        return JsonResponse({'code': -1, 'errorMsg': '缺少location参数'},
+                            json_dumps_params={'ensure_ascii': False})
+    elif 'userName' not in body:
+        return JsonResponse({'code': -1, 'errorMsg': '缺少userName参数'},
+                            json_dumps_params={'ensure_ascii': False})
+
+    data = RequestHistory(body['userName'], body['location'])
+    data.save()
+    return JsonResponse({'code': 0, "data": data.requestUser+'查询了'+data.location+'的天气'},
+                        json_dumps_params={'ensuer_ascii': False})
