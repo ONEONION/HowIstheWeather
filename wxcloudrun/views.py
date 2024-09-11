@@ -121,4 +121,4 @@ def get_weather(request):
     data = RequestHistory(requestUser=body['userName'], location=body['location'])
     data.save()
     return JsonResponse({'code': 0, "data": data.requestUser+'查询了'+data.location+'的天气'},
-                        json_dumps_params={'ensuer_ascii': False})
+                        json_dumps_params={'ensure_ascii': False})
