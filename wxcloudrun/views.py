@@ -3,7 +3,7 @@ import logging
 
 from django.http import JsonResponse
 from django.shortcuts import render
-from wxcloudrun.models import Counters
+from wxcloudrun.models import Counters, RequestHistory
 
 
 logger = logging.getLogger('log')
@@ -95,7 +95,7 @@ def weather(request, _):
     获取地址对应的天气
     """
     rsp = JsonResponse({'code': 0, 'errorMsg': ''}, json_dumps_params={'ensure_ascii': False})
-    if request.method == 'GET' or request.method == 'get':
+    if request.method == 'POST' or request.method == 'post':
         rsp = get_weather(request)
     else:
         rsp = JsonResponse({'code': -1, 'errorMsg': '请求方式错误'},

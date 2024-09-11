@@ -15,3 +15,16 @@ class Counters(models.Model):
 
     class Meta:
         db_table = 'Counters'  # 数据库表名
+
+
+class RequestHistory(models.Model):
+    id = models.AutoField
+    requestUser = models.CharField(default='noName')
+    location = models.TextField(default='北京市海淀区西土城路')
+    createdAt = models.DateTimeField(default=datetime.now(),)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = 'RequestHistory'

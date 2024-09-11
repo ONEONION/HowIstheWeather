@@ -336,13 +336,13 @@
 
   function query() {
     $.ajax("/api/weather", {
-      method: "GET",
+      method: "POST",
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       data: JSON.stringify({
-        userName: "high",
+        userName: "onion",
         location: $(".location-text").val()
-      })
+      }),
     }).done(function (res) {
       if (res && res.data !== undefined) {
         $(".weather").html(res.data);
