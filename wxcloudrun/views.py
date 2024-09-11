@@ -118,7 +118,7 @@ def get_weather(request):
         return JsonResponse({'code': -1, 'errorMsg': '缺少userName参数'},
                             json_dumps_params={'ensure_ascii': False})
 
-    data = RequestHistory(body['userName'], body['location'])
+    data = RequestHistory(requestUser=body['userName'], location=body['location'])
     data.save()
     return JsonResponse({'code': 0, "data": data.requestUser+'查询了'+data.location+'的天气'},
                         json_dumps_params={'ensuer_ascii': False})
