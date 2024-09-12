@@ -110,6 +110,7 @@ def get_weather(request):
 
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
+    logger.info('get message:' + body)
 
     if 'location' not in body:
         return JsonResponse({'code': -1, 'errorMsg': '缺少location参数'},
