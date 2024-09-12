@@ -20,8 +20,9 @@ class Counters(models.Model):
 
 class RequestHistory(models.Model):
     id = models.AutoField(primary_key=True)
-    requestUser = models.CharField(default='noName', max_length=128)
-    location = models.TextField(default='北京市海淀区西土城路')
+    requestUser = models.CharField(default='dontKnowWho', max_length=128)
+    msgType = models.CharField(default='text', max_length=32)
+    content = models.TextField(default='北京市海淀区西土城路')
     createdAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

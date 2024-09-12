@@ -3,6 +3,7 @@ import logging
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from datetime import datetime
 from wxcloudrun.models import Counters, RequestHistory
 
 
@@ -94,32 +95,45 @@ def weather(request, _):
     """
     获取地址对应的天气
     """
-    rsp = JsonResponse({'code': 0, 'errorMsg': ''}, json_dumps_params={'ensure_ascii': False})
-    if request.method == 'POST' or request.method == 'post':
-        rsp = get_weather(request)
-    else:
-        rsp = JsonResponse({'code': -1, 'errorMsg': '请求方式错误'},
-                           json_dumps_params={'ensure_ascii': False})
-    logger.info('response result: {}'.format(rsp.content.decode('utf-8')))
-    return rsp
-
-
-def get_weather(request):
-
-    logger.info('update_count req: {}'.format(request.body))
-
+    
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
-    logger.info('get message:' + body)
+    logger.info('query weather req:' + json.dumps(body))
 
-    if 'location' not in body:
-        return JsonResponse({'code': -1, 'errorMsg': '缺少location参数'},
+    if 'ToUserName' or 'FromUserName' or 'MsgType' or 'Content' not in body:
+        return JsonResponse({'code': -1, 'errorMsg': '参数不全'},
                             json_dumps_params={'ensure_ascii': False})
-    elif 'userName' not in body:
-        return JsonResponse({'code': -1, 'errorMsg': '缺少userName参数'},
-                            json_dumps_params={'ensure_ascii': False})
+    
+    # data = RequestHistory(requestUser=body['FromUserName'], 
+    #                      msgType = body['MsgType'],
+    #                      content = body['location'])
+    # data.save()
+    
+    rspContent = {'ToUserName': body['FromUserName'],
+                        'FromUserName': body['ToUserName'],
+                        'CreateTime': datetime.now(),
+                        'MsgType': 'text',
+                        'Content': '',
+    }
 
-    data = RequestHistory(requestUser=body['userName'], location=body['location'])
-    data.save()
-    return JsonResponse({'code': 0, "data": data.requestUser+'查询了'+data.location+'的天气'},
-                        json_dumps_params={'ensure_ascii': False})
+    if body['MsgType'] == 'text':
+        rspContent['Content'] = '收到你的消息了~你想' + body['Content'] + '，直接发定位给我就可以查天气~'
+    elif body['MsgType'] == 'location':
+        rspContent['MsgType'] = 'image'
+        rspContent['Image'] = get_weather(body['Locaion_X'], body['location_y'],
+                                            body['Scale'], body['Label'])
+    else:
+        rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我就可以查天气~'
+    
+    logger.info('response result: {}'.format(rspContent))
+    return JsonResponse(rspContent)
+
+
+def get_weather(location_x, location_y, scale, label):
+
+    #data = RequestHistory(requestUser=body['FromUserName'], location=body['location'])
+    #data.save()
+    
+    return '(%d, %d) %d %s'.format(location_x, location_y, scale, label)
+
+
