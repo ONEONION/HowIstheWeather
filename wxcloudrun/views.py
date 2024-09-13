@@ -1,9 +1,9 @@
 import json
 import logging
+import time
 
 from django.http import JsonResponse
 from django.shortcuts import render
-from datetime import datetime
 from wxcloudrun.models import Counters, RequestHistory
 
 
@@ -100,7 +100,7 @@ def weather(request, _):
     body = json.loads(body_unicode)
     logger.info('query weather req:' + json.dumps(body))
 
-    if 'ToUserName' or 'FromUserName' or 'MsgType' or 'Content' not in body:
+    if 'ToUserName' not in body:
         return JsonResponse({'code': -1, 'errorMsg': '参数不全'},
                             json_dumps_params={'ensure_ascii': False})
     
@@ -111,22 +111,22 @@ def weather(request, _):
     
     rspContent = {'ToUserName': body['FromUserName'],
                         'FromUserName': body['ToUserName'],
-                        'CreateTime': datetime.now(),
+                        'CreateTime': int(time.time()),
                         'MsgType': 'text',
                         'Content': '',
     }
 
     if body['MsgType'] == 'text':
-        rspContent['Content'] = '收到你的消息了~你想' + body['Content'] + '，直接发定位给我就可以查天气~'
+        rspContent['Content'] = '收到你的消息了，你想' + body['Content'] + '，直接发定位给我可以查两小时内的天气~'
     elif body['MsgType'] == 'location':
         rspContent['MsgType'] = 'image'
-        rspContent['Image'] = get_weather(body['Locaion_X'], body['location_y'],
+        rspContent['Image'] = get_weather(body['Location_X'], body['Location_Y'],
                                             body['Scale'], body['Label'])
     else:
-        rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我就可以查天气~'
+        rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我可以查两小时内的天气~'
     
     logger.info('response result: {}'.format(rspContent))
-    return JsonResponse(rspContent)
+    return JsonResponse(rspContent, json_dumps_params={'ensure_ascii': False})
 
 
 def get_weather(location_x, location_y, scale, label):
@@ -134,6 +134,6 @@ def get_weather(location_x, location_y, scale, label):
     #data = RequestHistory(requestUser=body['FromUserName'], location=body['location'])
     #data.save()
     
-    return '(%d, %d) %d %s'.format(location_x, location_y, scale, label)
+    return '(%f, %f) %d, %s'%(location_x, location_y, scale, label)
 
 
