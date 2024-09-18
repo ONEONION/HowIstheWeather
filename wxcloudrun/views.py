@@ -104,10 +104,7 @@ def weather(request, _):
         return JsonResponse({'code': -1, 'errorMsg': '参数不全'},
                             json_dumps_params={'ensure_ascii': False})
     
-    # data = RequestHistory(requestUser=body['FromUserName'], 
-    #                      msgType = body['MsgType'],
-    #                      content = body['location'])
-    # data.save()
+        
     
     rspContent = {'ToUserName': body['FromUserName'],
                         'FromUserName': body['ToUserName'],
@@ -118,12 +115,22 @@ def weather(request, _):
 
     if body['MsgType'] == 'text':
         rspContent['Content'] = '收到你的消息了，你想' + body['Content'] + '，直接发定位给我可以查两小时内的天气~'
+        data = RequestHistory(requestUser=body['FromUserName'], 
+                        msgType = body['MsgType'],
+                        content = body['Content'])
     elif body['MsgType'] == 'location':
         rspContent['MsgType'] = 'image'
         rspContent['Image'] = get_weather(body['Location_X'], body['Location_Y'],
                                             body['Scale'], body['Label'])
+        data = RequestHistory(requestUser=body['FromUserName'], 
+                        msgType = body['MsgType'],
+                        content = '{},{},{}'.format(body['Location_X'], body['Location_Y'], body['Label']))
     else:
         rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我可以查两小时内的天气~'
+        data = RequestHistory(requestUser=body['FromUserName'],
+                              msgType = body['MsgType'])
+
+    data.save()
     
     logger.info('response result: {}'.format(rspContent))
     return JsonResponse(rspContent, json_dumps_params={'ensure_ascii': False})
