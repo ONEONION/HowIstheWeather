@@ -5,6 +5,7 @@ import time
 from django.http import JsonResponse
 from django.shortcuts import render
 from wxcloudrun.models import Counters, RequestHistory
+from wxcloudrun.weather import get_weather
 
 
 logger = logging.getLogger('log')
@@ -120,25 +121,14 @@ def weather(request, _):
         data.content = body['Content']
     elif body['MsgType'] == 'location':
         rspContent['MsgType'] = 'image'
-        rspContent['Image'] = get_weather(body['Location_X'], body['Location_Y'],
-                                            body['Scale'], body['Label'])
-        data.content = '{},{},{}'.format(body['Location_X'], body['Location_Y'], body['Label']))
+        rspContent['Image'] = get_weather(body['Location_X'], body['Location_Y'])
+        data.content = '{},{},{}'.format(body['Location_X'], body['Location_Y'], body['Label'])
     else:
         rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我可以查两小时内的天气~'
-        if body['MsgType'] in ('image', 'voice','video'):
+        if body['MsgType'] in ('image', 'voice', 'video'):
             data.content = body['MediaId']
 
 
     data.save()
     logger.info('response result: {}'.format(rspContent))
     return JsonResponse(rspContent, json_dumps_params={'ensure_ascii': False})
-
-
-def get_weather(location_x, location_y, scale, label):
-
-    #data = RequestHistory(requestUser=body['FromUserName'], location=body['location'])
-    #data.save()
-    
-    return '(%f, %f) %d, %s'%(location_x, location_y, scale, label)
-
-
