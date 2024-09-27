@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
 
 import time
-
 import requests
+import os
+import logging
 
+logger = logging.getLogger('log')
 
-HourlyWeatherUrl = 'https://api.caiyunapp.com/v2.6/kjkHlqwp1lHrU1RT/{},{}/hourly?hourlysteps=48'
+# 微信云托管
+UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type=image'
+AccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}'
+AccessToken = None
+# 高德地图
+MapKey = '248f4fad0db78a6c07ad45fc041775f6'
+MapUrl = 'https://restapi.amap.com/v3/staticmap?location={},{}&zoom={}&key={}'
+MapSavePath = './wxcloudrun/maps/'
+# 彩云天气
+MinutelyWeatherUrl = 'https://api.caiyunapp.com/v2.6/kjkHlqwp1lHrU1RT/{},{}/hourly'
 MAX_RETRY = 3
-err_code ={
+err_code = {
     400: 'Token不存在',
     401: 'Token无权限',
     422: '参数错误',
@@ -15,15 +26,31 @@ err_code ={
     500: '服务器错误',
 }
 
-def get_weather(location_x, location_y):
+
+def get_weather(location_x, location_y, scale):
+    # 返回值格式为二者之一： 
+    # ['image', 'MediaId', img_url]
+    # ['text', 'Content', text]
+
+    weather_data = query_weather(location_x, location_y)
+    if weather_data['status'] != 'ok':
+        return ['text', 'Content', weather_data['error']]
+    
+    map_img_path = get_map(location_x, location_y, scale)
+    media_id = upload_img(map_img_path)
+    return ['image', 'MediaId', media_id]
+
+
+
+def query_weather(location_x, location_y):
     data = {'status': 'failed',
-                    'error': '天气API出错, 请重试',
-                    'api_version': '2.6'}
+            'error': '天气API出错, 请重试',
+            'api_version': '2.6'}
     retry_times = 0
 
     while retry_times <= MAX_RETRY:
         try:
-            rsp = requests.get(HourlyWeatherUrl.format(location_y, location_x))
+            rsp = requests.get(MinutelyWeatherUrl.format(location_x, location_y))
             if rsp.status_code == 200: 
                 data = rsp.json()
                 break
@@ -34,17 +61,58 @@ def get_weather(location_x, location_y):
                 break
             else:
                 retry_times += 1
-                time.sleep(retry_times*retry_times)
+
+        except Exception:
+            retry_times += 1
+            time.sleep(retry_times*retry_times)
+            continue
+    return data
+
+
+def get_map(location_x, location_y, scale):
+    # 从高德地图获取图片背景
+    data = {'status': 'failed',
+            'error': '连接地图服务器出错, 请重试',
+            'api_version': '2.6'}
+    retry_times = 0
+    while retry_times <= MAX_RETRY:
+        try:
+            rsp = requests.get(MapUrl.format(location_x, location_y, scale, MapKey))
+            if rsp.status_code == 200: 
+                map_img = rsp.content
+                break
+            else:
+                retry_times += 1
 
         except Exception:
             retry_times += 1
             time.sleep(retry_times*retry_times)
             continue
     
+    with open(MapSavePath+'map_img.png', 'wb') as img:
+        img.write(map_img)
 
-    return data
+    return MapSavePath+'map_img.png'  
 
+
+def get_access_token():
+    global AccessToken
+    if AccessToken is None or AccessToken['expire_time'] < time.time():
+        rsp = requests.get(AccessTokenUrl.format(os.environ.get("APP_ID"), os.environ.get("APP_SECRET")))
+        AccessToken = {'access_token': rsp.json()['access_token'], 
+                    'expire_time': time.time() + rsp.json()['expires_in'] }
+    return AccessToken['access_token']
+
+
+def upload_img(img_url):
+    img = {
+        'media': open(img_url, 'rb')
+    }
+    rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
+    return rsp.json()['media_id']
+    
 
 if __name__ == '__main__':
     print('get weather')
-    print(get_weather(39.914680, 116.359474))
+   # print(query_weather(116.401463, 39.849968))
+    upload_img(get_map(116.401463, 39.849968, 12))

@@ -120,8 +120,9 @@ def weather(request, _):
         rspContent['Content'] = '收到你的消息了，你想' + body['Content'] + '，直接发定位给我可以查两小时内的天气~'
         data.content = body['Content']
     elif body['MsgType'] == 'location':
-        rspContent['MsgType'] = 'image'
-        rspContent['Image'] = get_weather(body['Location_X'], body['Location_Y'])
+        res = get_weather(body['Location_X'], body['Location_Y'], body['Scale'])
+        rspContent['MsgType'] = res[0]
+        rspContent[res[1]] = res[2]
         data.content = '{},{},{}'.format(body['Location_X'], body['Location_Y'], body['Label'])
     else:
         rspContent['Content'] = '暂时不懂你想做什么哦，直接发定位给我可以查两小时内的天气~'
