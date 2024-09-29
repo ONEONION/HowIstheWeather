@@ -13,7 +13,7 @@ AccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_cred
 AccessToken = None
 # 高德地图
 MapKey = '248f4fad0db78a6c07ad45fc041775f6'
-MapUrl = 'https://restapi.amap.com/v3/staticmap?location={},{}&zoom={}&key={}'
+MapUrl = 'https://restapi.amap.com/v3/staticmap?location={},{}&zoom={}&key={}&size=400*600'
 MapSavePath = './wxcloudrun/maps/'
 # 彩云天气
 HourlyWeatherUrl = 'https://api.caiyunapp.com/v2.6/kjkHlqwp1lHrU1RT/{},{}/hourly'
@@ -29,7 +29,7 @@ err_code = {
 
 def get_weather(location_x, location_y, scale):
     # 返回值格式为二者之一： 
-    # ['image', 'MediaId', img_url]
+    # ['image', 'MediaId', img_id]
     # ['text', 'Content', text]
 
     weather_data = query_weather(location_x, location_y)
@@ -81,8 +81,8 @@ def get_map(location_x, location_y, scale):
     retry_times = 0
     while retry_times <= MAX_RETRY:
         try:
-            rsp = requests.get(MapUrl.format(location_x, location_y, scale, MapKey))
-            logger.info('request: '+ MapUrl.format(location_x, location_y, scale, MapKey))
+            rsp = requests.get(MapUrl.format(location_y, location_x, scale, MapKey))
+            logger.info('request: '+ MapUrl.format(location_y, location_x, scale, MapKey))
             if rsp.status_code == 200: 
                 map_img = rsp.content
                 break
@@ -94,16 +94,17 @@ def get_map(location_x, location_y, scale):
             time.sleep(retry_times*retry_times)
             continue
     
-    with open(MapSavePath+'map_img.png', 'wb') as img:
+    with open(MapSavePath+'map_img.jpg', 'wb') as img:
         img.write(map_img)
 
-    return MapSavePath+'map_img.png'  
+    return MapSavePath+'map_img.jpg'  
 
 
 def get_access_token():
     global AccessToken
     if AccessToken is None or AccessToken['expire_time'] < time.time():
         rsp = requests.get(AccessTokenUrl.format(os.environ.get("APP_ID"), os.environ.get("APP_SECRET")))
+    #    rsp = requests.get(AccessTokenUrl.format('wx6bb828210f8d7989', '8ac2dc63edc3a2cf6420508fbf6fe6de'))
         AccessToken = {'access_token': rsp.json()['access_token'], 
                     'expire_time': time.time() + rsp.json()['expires_in'] }
     logger.info('get access_token')
@@ -112,7 +113,8 @@ def get_access_token():
 
 def upload_img(img_url):
     img = {
-        'media': open(img_url, 'rb')
+        'media': open(img_url, 'rb'),
+
     }
     try:
         rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
@@ -126,4 +128,10 @@ def upload_img(img_url):
 if __name__ == '__main__':
     print('get weather')
     # print(get_weather(39.849968, 116.401463, 12))
-    get_map(39.849968, 116.401463, 12)
+    media_id = upload_img(get_map(39.629968, 116.401463, 15))
+    print(media_id)
+    print(AccessToken)
+    rsp = requests.get('https://api.weixin.qq.com/cgi-bin/media/get?access_token={}&media_id={}'.format(AccessToken['access_token'], media_id[1]))
+    with open(MapSavePath + 'map_download.jpg', 'wb') as img:
+        img.write(rsp.content)
+    print(MapSavePath + 'map_download.jpg')
