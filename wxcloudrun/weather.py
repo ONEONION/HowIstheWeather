@@ -16,7 +16,7 @@ MapKey = '248f4fad0db78a6c07ad45fc041775f6'
 MapUrl = 'https://restapi.amap.com/v3/staticmap?location={},{}&zoom={}&key={}'
 MapSavePath = './wxcloudrun/maps/'
 # 彩云天气
-MinutelyWeatherUrl = 'https://api.caiyunapp.com/v2.6/kjkHlqwp1lHrU1RT/{},{}/hourly'
+HourlyWeatherUrl = 'https://api.caiyunapp.com/v2.6/kjkHlqwp1lHrU1RT/{},{}/hourly'
 MAX_RETRY = 3
 err_code = {
     400: 'Token不存在',
@@ -37,8 +37,11 @@ def get_weather(location_x, location_y, scale):
         return ['text', 'Content', weather_data['error']]
     
     map_img_path = get_map(location_x, location_y, scale)
-    media_id = upload_img(map_img_path)
-    return ['image', 'MediaId', media_id]
+    res = upload_img(map_img_path)
+    if res[0] == 1:
+        return ['image', 'MediaId', res[1]]
+    else:
+        return ['text', 'Content', res[1]]
 
 
 
@@ -50,7 +53,8 @@ def query_weather(location_x, location_y):
 
     while retry_times <= MAX_RETRY:
         try:
-            rsp = requests.get(MinutelyWeatherUrl.format(location_x, location_y))
+            rsp = requests.get(HourlyWeatherUrl.format(location_y, location_x))
+            logger.info('get request:' + HourlyWeatherUrl.format(location_y, location_x))
             if rsp.status_code == 200: 
                 data = rsp.json()
                 break
@@ -78,6 +82,7 @@ def get_map(location_x, location_y, scale):
     while retry_times <= MAX_RETRY:
         try:
             rsp = requests.get(MapUrl.format(location_x, location_y, scale, MapKey))
+            logger.info('request: '+ MapUrl.format(location_x, location_y, scale, MapKey))
             if rsp.status_code == 200: 
                 map_img = rsp.content
                 break
@@ -101,6 +106,7 @@ def get_access_token():
         rsp = requests.get(AccessTokenUrl.format(os.environ.get("APP_ID"), os.environ.get("APP_SECRET")))
         AccessToken = {'access_token': rsp.json()['access_token'], 
                     'expire_time': time.time() + rsp.json()['expires_in'] }
+    logger.info('get access_token')
     return AccessToken['access_token']
 
 
@@ -108,11 +114,16 @@ def upload_img(img_url):
     img = {
         'media': open(img_url, 'rb')
     }
-    rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
-    return rsp.json()['media_id']
+    try:
+        rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
+        logger.info('post request: '+ UploadUrl.format(get_access_token()))
+    except Exception as e:
+        logger.info(e.with_traceback)
+        return -1, '上传图片失败'
+    return 1, rsp.json()['media_id']
     
 
 if __name__ == '__main__':
     print('get weather')
-   # print(query_weather(116.401463, 39.849968))
-    upload_img(get_map(116.401463, 39.849968, 12))
+    # print(get_weather(39.849968, 116.401463, 12))
+    get_map(39.849968, 116.401463, 12)
