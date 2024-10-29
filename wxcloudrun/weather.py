@@ -186,13 +186,13 @@ def images2video(background_img, images):
 
 def modify_alpha(image):
     if image.shape[-1] == 4:
-        print('shape = 4')
+        # 如果原图有alpha通道
         for i in range(image.shape[0]):
             for j in range(image.shape[1]): 
                 if image[i,j,0] + image[i,j,1] + image[i,j,2] != 0:
                     image[i,j,3] = 255
     elif image.shape[-1] == 3:
-        print('shape = 3')
+        # 如果原图没有alpha通道
         alpha = np.ones((461, 461), dtype=np.uint8) * 255
         image = cv2.merge((image[:,:,0], image[:,:,1], image[:,:,2], alpha))
     else:
