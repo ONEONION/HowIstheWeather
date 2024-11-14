@@ -4,9 +4,11 @@ import time
 import requests
 import os
 import logging
-import cv2
+# import cv2
 import numpy as np
-from moviepy.editor import ImageSequenceClip
+from moviepy.editor import ImageSequenceClip, TextClip, CompositeVideoClip
+import imageio
+from PIL import ImageDraw, Image
 
 logger = logging.getLogger('log')
 
@@ -99,10 +101,10 @@ def get_map(location_x, location_y, scale):
             time.sleep(retry_times*retry_times)
             continue
     
-    with open(MapSavePath+'map_img.jpg', 'wb') as img:
+    with open(MapSavePath+'map_img.png', 'wb') as img:
         img.write(map_img)
 
-    return MapSavePath+'map_img.jpg'  
+    return MapSavePath+'map_img.png'  
 
 
 def get_access_token():
@@ -155,15 +157,38 @@ def get_radar(location_x, location_y):
     for i in range(len(images_url)):
         rsp = requests.get(images_url[i][0], headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'})
         if rsp.status_code == 200:
-            radar_images.append({'image': MapSavePath+'forecast_img_%d.jpg'%i, 
+            radar_images.append({'image': MapSavePath+'forecast_img_%d.png'%i, 
                         'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(images_url[i][1]))
                         })
-            with open(MapSavePath+'forecast_img_%d.jpg'%i, 'wb') as img:
+            with open(MapSavePath+'forecast_img_%d.png'%i, 'wb') as img:
                 img.write(rsp.content)
     return radar_images
 
 
 def images2video(background_img, images):
+    # background_img是图片地址
+    # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
+    background = modify_alpha(imageio.imread(background_img))
+
+    frames= []
+    for img in images:
+        weather_img = Image.open(img['image'])
+        draw = ImageDraw.Draw(weather_img)
+        draw.text((340, 0), img['timestamp'], fill=(0, 0, 0))
+        weather_img.save(img['image'])
+
+        weather_img = imageio.imread(img['image'])
+        combined_img = (background + weather_img).astype(np.uint8)
+        frames.append(combined_img)
+
+    clip = ImageSequenceClip(frames, fps=12)
+    clip.write_videofile(MapSavePath+'output_video.mp4')
+    
+    return MapSavePath + 'output_video.mp4'
+
+
+
+def images2video_old(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
 
@@ -193,8 +218,8 @@ def modify_alpha(image):
                     image[i,j,3] = 255
     elif image.shape[-1] == 3:
         # 如果原图没有alpha通道
-        alpha = np.ones((461, 461), dtype=np.uint8) * 255
-        image = cv2.merge((image[:,:,0], image[:,:,1], image[:,:,2], alpha))
+        alpha = np.zeros((461, 461), dtype=np.uint8) * 255
+        image = np.stack((image[:,:,0], image[:,:,1], image[:,:,2], alpha), axis = 2)
     else:
         raise Exception
     return image
@@ -205,11 +230,11 @@ if __name__ == '__main__':
     print('get weather')
     # print(get_weather(39.849968, 116.401463, 12))
     # media_id = upload_img(get_map(39.629968, 116.401463, 15))
-    # bg = get_map(40.8151, 115.7168, 12)
-    # radar_imgs = get_radar(40.8151, 115.7168)
-    radar_imgs = [{'image': './wxcloudrun/maps/forecast_img_0.jpg', 'timestamp': '2024-10-11 15:31:02'}, {'image': './wxcloudrun/maps/forecast_img_1.jpg', 'timestamp': '2024-10-11 15:36:49'}, {'image': './wxcloudrun/maps/forecast_img_2.jpg', 'timestamp': '2024-10-11 15:42:36'}, {'image': './wxcloudrun/maps/forecast_img_3.jpg', 'timestamp': '2024-10-11 15:48:23'}, {'image': './wxcloudrun/maps/forecast_img_4.jpg', 'timestamp': '2024-10-11 15:54:10'}, {'image': './wxcloudrun/maps/forecast_img_5.jpg', 'timestamp': '2024-10-11 15:59:57'}, {'image': './wxcloudrun/maps/forecast_img_6.jpg', 'timestamp': '2024-10-11 16:05:44'}, {'image': './wxcloudrun/maps/forecast_img_7.jpg', 'timestamp': '2024-10-11 16:11:31'}, {'image': './wxcloudrun/maps/forecast_img_8.jpg', 'timestamp': '2024-10-11 16:17:18'}, {'image': './wxcloudrun/maps/forecast_img_9.jpg', 'timestamp': '2024-10-11 16:23:05'}, {'image': './wxcloudrun/maps/forecast_img_10.jpg', 'timestamp': '2024-10-11 16:28:52'}, {'image': './wxcloudrun/maps/forecast_img_11.jpg', 'timestamp': '2024-10-11 16:34:39'}, {'image': './wxcloudrun/maps/forecast_img_12.jpg', 'timestamp': '2024-10-11 16:40:26'}, {'image': './wxcloudrun/maps/forecast_img_13.jpg', 'timestamp': '2024-10-11 16:46:13'}, {'image': './wxcloudrun/maps/forecast_img_14.jpg', 'timestamp': '2024-10-11 16:52:00'}, {'image': './wxcloudrun/maps/forecast_img_15.jpg', 'timestamp': '2024-10-11 16:57:47'}, {'image': './wxcloudrun/maps/forecast_img_16.jpg', 'timestamp': '2024-10-11 17:03:34'}, {'image': './wxcloudrun/maps/forecast_img_17.jpg', 'timestamp': '2024-10-11 17:09:21'}, {'image': './wxcloudrun/maps/forecast_img_18.jpg', 'timestamp': '2024-10-11 17:15:08'}, {'image': './wxcloudrun/maps/forecast_img_19.jpg', 'timestamp': '2024-10-11 17:20:55'}, {'image': './wxcloudrun/maps/forecast_img_20.jpg', 'timestamp': '2024-10-11 17:26:42'}, {'image': './wxcloudrun/maps/forecast_img_21.jpg', 'timestamp': '2024-10-11 17:32:29'}, {'image': './wxcloudrun/maps/forecast_img_22.jpg', 'timestamp': '2024-10-11 17:38:16'}, {'image': './wxcloudrun/maps/forecast_img_23.jpg', 'timestamp': '2024-10-11 17:44:03'}, {'image': './wxcloudrun/maps/forecast_img_24.jpg', 'timestamp': '2024-10-11 17:49:50'}, {'image': './wxcloudrun/maps/forecast_img_25.jpg', 'timestamp': '2024-10-11 17:55:37'}]
-    bg = MapSavePath + 'map_img.jpg'
+    bg = get_map(40.0741, 113.2861, 12)
+    radar_imgs = get_radar(40.0741, 113.2861)
+    # radar_imgs = [{'image': './wxcloudrun/maps/forecast_img_0.png', 'timestamp': '2024-10-11 15:31:02'}, {'image': './wxcloudrun/maps/forecast_img_1.png', 'timestamp': '2024-10-11 15:36:49'}, {'image': './wxcloudrun/maps/forecast_img_2.png', 'timestamp': '2024-10-11 15:42:36'}, {'image': './wxcloudrun/maps/forecast_img_3.png', 'timestamp': '2024-10-11 15:48:23'}, {'image': './wxcloudrun/maps/forecast_img_4.png', 'timestamp': '2024-10-11 15:54:10'}, {'image': './wxcloudrun/maps/forecast_img_5.png', 'timestamp': '2024-10-11 15:59:57'}, {'image': './wxcloudrun/maps/forecast_img_6.png', 'timestamp': '2024-10-11 16:05:44'}, {'image': './wxcloudrun/maps/forecast_img_7.png', 'timestamp': '2024-10-11 16:11:31'}, {'image': './wxcloudrun/maps/forecast_img_8.png', 'timestamp': '2024-10-11 16:17:18'}, {'image': './wxcloudrun/maps/forecast_img_9.png', 'timestamp': '2024-10-11 16:23:05'}, {'image': './wxcloudrun/maps/forecast_img_10.png', 'timestamp': '2024-10-11 16:28:52'}, {'image': './wxcloudrun/maps/forecast_img_11.png', 'timestamp': '2024-10-11 16:34:39'}, {'image': './wxcloudrun/maps/forecast_img_12.png', 'timestamp': '2024-10-11 16:40:26'}, {'image': './wxcloudrun/maps/forecast_img_13.png', 'timestamp': '2024-10-11 16:46:13'}, {'image': './wxcloudrun/maps/forecast_img_14.png', 'timestamp': '2024-10-11 16:52:00'}, {'image': './wxcloudrun/maps/forecast_img_15.png', 'timestamp': '2024-10-11 16:57:47'}, {'image': './wxcloudrun/maps/forecast_img_16.png', 'timestamp': '2024-10-11 17:03:34'}, {'image': './wxcloudrun/maps/forecast_img_17.png', 'timestamp': '2024-10-11 17:09:21'}, {'image': './wxcloudrun/maps/forecast_img_18.png', 'timestamp': '2024-10-11 17:15:08'}, {'image': './wxcloudrun/maps/forecast_img_19.png', 'timestamp': '2024-10-11 17:20:55'}, {'image': './wxcloudrun/maps/forecast_img_20.png', 'timestamp': '2024-10-11 17:26:42'}, {'image': './wxcloudrun/maps/forecast_img_21.png', 'timestamp': '2024-10-11 17:32:29'}, {'image': './wxcloudrun/maps/forecast_img_22.png', 'timestamp': '2024-10-11 17:38:16'}, {'image': './wxcloudrun/maps/forecast_img_23.png', 'timestamp': '2024-10-11 17:44:03'}, {'image': './wxcloudrun/maps/forecast_img_24.png', 'timestamp': '2024-10-11 17:49:50'}, {'image': './wxcloudrun/maps/forecast_img_25.png', 'timestamp': '2024-10-11 17:55:37'}]
+    # bg = MapSavePath + 'map_img.png'
     print(images2video(bg, radar_imgs))
-    # background = cv2.cvtColor(cv2.imread(MapSavePath + 'map_img-.jpg', cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB)
+    # background = cv2.cvtColor(cv2.imread(MapSavePath + 'map_img-.png', cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB)
 
     
