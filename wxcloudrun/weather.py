@@ -4,9 +4,8 @@ import time
 import requests
 import os
 import logging
-# import cv2
 import numpy as np
-from moviepy.editor import ImageSequenceClip, TextClip, CompositeVideoClip
+from moviepy.editor import ImageSequenceClip
 import imageio
 from PIL import ImageDraw, Image
 
@@ -213,6 +212,4 @@ if __name__ == '__main__':
     # radar_imgs = [{'image': './wxcloudrun/maps/forecast_img_0.png', 'timestamp': '2024-10-11 15:31:02'}, {'image': './wxcloudrun/maps/forecast_img_1.png', 'timestamp': '2024-10-11 15:36:49'}, {'image': './wxcloudrun/maps/forecast_img_2.png', 'timestamp': '2024-10-11 15:42:36'}, {'image': './wxcloudrun/maps/forecast_img_3.png', 'timestamp': '2024-10-11 15:48:23'}, {'image': './wxcloudrun/maps/forecast_img_4.png', 'timestamp': '2024-10-11 15:54:10'}, {'image': './wxcloudrun/maps/forecast_img_5.png', 'timestamp': '2024-10-11 15:59:57'}, {'image': './wxcloudrun/maps/forecast_img_6.png', 'timestamp': '2024-10-11 16:05:44'}, {'image': './wxcloudrun/maps/forecast_img_7.png', 'timestamp': '2024-10-11 16:11:31'}, {'image': './wxcloudrun/maps/forecast_img_8.png', 'timestamp': '2024-10-11 16:17:18'}, {'image': './wxcloudrun/maps/forecast_img_9.png', 'timestamp': '2024-10-11 16:23:05'}, {'image': './wxcloudrun/maps/forecast_img_10.png', 'timestamp': '2024-10-11 16:28:52'}, {'image': './wxcloudrun/maps/forecast_img_11.png', 'timestamp': '2024-10-11 16:34:39'}, {'image': './wxcloudrun/maps/forecast_img_12.png', 'timestamp': '2024-10-11 16:40:26'}, {'image': './wxcloudrun/maps/forecast_img_13.png', 'timestamp': '2024-10-11 16:46:13'}, {'image': './wxcloudrun/maps/forecast_img_14.png', 'timestamp': '2024-10-11 16:52:00'}, {'image': './wxcloudrun/maps/forecast_img_15.png', 'timestamp': '2024-10-11 16:57:47'}, {'image': './wxcloudrun/maps/forecast_img_16.png', 'timestamp': '2024-10-11 17:03:34'}, {'image': './wxcloudrun/maps/forecast_img_17.png', 'timestamp': '2024-10-11 17:09:21'}, {'image': './wxcloudrun/maps/forecast_img_18.png', 'timestamp': '2024-10-11 17:15:08'}, {'image': './wxcloudrun/maps/forecast_img_19.png', 'timestamp': '2024-10-11 17:20:55'}, {'image': './wxcloudrun/maps/forecast_img_20.png', 'timestamp': '2024-10-11 17:26:42'}, {'image': './wxcloudrun/maps/forecast_img_21.png', 'timestamp': '2024-10-11 17:32:29'}, {'image': './wxcloudrun/maps/forecast_img_22.png', 'timestamp': '2024-10-11 17:38:16'}, {'image': './wxcloudrun/maps/forecast_img_23.png', 'timestamp': '2024-10-11 17:44:03'}, {'image': './wxcloudrun/maps/forecast_img_24.png', 'timestamp': '2024-10-11 17:49:50'}, {'image': './wxcloudrun/maps/forecast_img_25.png', 'timestamp': '2024-10-11 17:55:37'}]
     # bg = MapSavePath + 'map_img.png'
     print(images2video(bg, radar_imgs))
-    # background = cv2.cvtColor(cv2.imread(MapSavePath + 'map_img-.png', cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB)
-
     
