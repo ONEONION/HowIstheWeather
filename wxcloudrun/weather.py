@@ -187,28 +187,6 @@ def images2video(background_img, images):
     return MapSavePath + 'output_video.mp4'
 
 
-
-def images2video_old(background_img, images):
-    # background_img是图片地址
-    # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
-
-    background = modify_alpha(cv2.cvtColor(cv2.imread(background_img, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB))
-
-    frames = []
-    for img in images:
-        weather_img = modify_alpha(cv2.imread(img['image'], cv2.IMREAD_UNCHANGED))
-        tmp_img = cv2.addWeighted(background.copy(), 1, weather_img, 0.5, 0)
-        # addWeighted的用法是（X, a, Y, b, c）,合成效果是 a*X + b*Y，如果b不等于1-a,那b不会生效
-        # tmp_img = cv2.add(background.copy(), cv2.imread(img['image']))
-        cv2.putText(tmp_img, img['timestamp'], (275, 12), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, color = (0, 0, 0))
-        frames.append(tmp_img)
-
-    clip = ImageSequenceClip(frames, fps=12)
-    clip.write_videofile(MapSavePath+'output_video.mp4')
-    
-    return MapSavePath + 'output_video.mp4'
-
-
 def modify_alpha(image):
     if image.shape[-1] == 4:
         # 如果原图有alpha通道
