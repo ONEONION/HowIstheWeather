@@ -1,1 +1,6 @@
 .cloudbase
+*.yml
+logs
+__pycache__
+.vscode
+Dockerfile.development
