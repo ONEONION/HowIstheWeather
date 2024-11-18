@@ -6,8 +6,8 @@ import os
 import logging
 import numpy as np
 from moviepy.editor import ImageSequenceClip
-import imageio
-from PIL import ImageDraw, Image
+# import imageio
+# from PIL import ImageDraw, Image
 
 logger = logging.getLogger('log')
 
@@ -40,10 +40,14 @@ def get_weather(location_x, location_y, scale):
     if weather_data['status'] != 'ok':
         return ['text', 'Content', weather_data['error']]
     
+    map_img_path = get_map(location_x, location_y, scale)
+    res = upload_img(map_img_path)
+    '''
     map_img = get_map(location_x, location_y, scale)
     radar_imgs = get_radar(location_x, location_y)
     mp4_path = images2video(map_img, radar_imgs)
     res = upload_img(mp4_path)
+    '''
     if res[0] == 1:
         return ['image', 'MediaId', res[1]]
     else:
