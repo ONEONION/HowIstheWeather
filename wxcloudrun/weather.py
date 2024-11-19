@@ -4,9 +4,9 @@ import time
 import requests
 import os
 import logging
-# import numpy as np
+import numpy as np
 # from moviepy.editor import ImageSequenceClip
-# import imageio
+import imageio
 # from PIL import ImageDraw, Image
 
 logger = logging.getLogger('log')
