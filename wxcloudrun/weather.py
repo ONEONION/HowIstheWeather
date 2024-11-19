@@ -4,8 +4,8 @@ import time
 import requests
 import os
 import logging
-import numpy as np
-from moviepy.editor import ImageSequenceClip
+# import numpy as np
+# from moviepy.editor import ImageSequenceClip
 # import imageio
 # from PIL import ImageDraw, Image
 
