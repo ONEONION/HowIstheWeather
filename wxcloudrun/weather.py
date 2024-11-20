@@ -5,7 +5,7 @@ import requests
 import os
 import logging
 import numpy as np
-# from moviepy.editor import ImageSequenceClip
+from site_packages.moviepy import ImageSequenceClip
 import imageio
 # from PIL import ImageDraw, Image
 
@@ -168,7 +168,6 @@ def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
     try:
-        from moviepy.editor import ImageSequenceClip
         from PIL import ImageDraw, Image
     except ImportError:
         logger.log('Import moviepy.editor, PIL.Image error')
