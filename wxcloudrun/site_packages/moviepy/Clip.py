@@ -10,7 +10,7 @@ import numpy as np
 import proglog
 from tqdm import tqdm
 
-from moviepy.decorators import (apply_to_audio, apply_to_mask,
+from .decorators import (apply_to_audio, apply_to_mask,
                                 convert_to_seconds, outplace,
                                 requires_duration, use_clip_fps_by_default)
 

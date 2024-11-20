@@ -9,8 +9,8 @@ import subprocess as sp
 import numpy as np
 from proglog import proglog
 
-from moviepy.compat import DEVNULL, PY3
-from moviepy.config import get_setting
+from .compat import DEVNULL, PY3
+from .config import get_setting
 
 
 class FFMPEG_VideoWriter:

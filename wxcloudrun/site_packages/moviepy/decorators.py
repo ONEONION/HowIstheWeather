@@ -4,7 +4,7 @@ all decorators used in moviepy go there
 
 import decorator
 
-from moviepy.tools import cvsecs
+from .tools import cvsecs
 
 
 @decorator.decorator

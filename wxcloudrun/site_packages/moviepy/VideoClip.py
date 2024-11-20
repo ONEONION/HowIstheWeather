@@ -7,10 +7,10 @@ main subclasses:
 import os
 import proglog
 
-from Clip import Clip
-from decorators import (convert_masks_to_RGB, requires_duration, use_clip_fps_by_default)
-from tools import (extensions_dict, find_extension,is_string)
-from ffmpeg_writer import ffmpeg_write_video
+from .Clip import Clip
+from .decorators import (convert_masks_to_RGB, requires_duration, use_clip_fps_by_default)
+from .tools import (extensions_dict, find_extension,is_string)
+from .ffmpeg_writer import ffmpeg_write_video
 
 
 class VideoClip(Clip):

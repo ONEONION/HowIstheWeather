@@ -3,7 +3,7 @@ import os
 import numpy as np
 from imageio import imread
 
-from . import VideoClip
+from .VideoClip import VideoClip
 
 
 class ImageSequenceClip(VideoClip):
