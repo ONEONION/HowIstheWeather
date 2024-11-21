@@ -1,5 +1,7 @@
 from typing import Any
 
+PILLOW_VERSION = "9.5.0"
+
 class ImagingCore:
     def __getitem__(self, index: int) -> float: ...
     def __getattr__(self, name: str) -> Any: ...
