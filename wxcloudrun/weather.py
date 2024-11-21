@@ -12,11 +12,11 @@ logger = logging.getLogger('log')
 try:
     from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
 except Exception as e:
-    logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
+    logger.info(e.with_traceback)
 try:
     from wxcloudrun.site_packages.PIL import ImageDraw, Image
 except Exception as e:
-    logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
+    logger.info(e.with_traceback)
 
 
 # 微信云托管
@@ -54,7 +54,7 @@ def get_weather(location_x, location_y, scale):
         mp4_path = images2video(map_img, radar_imgs)
     except Exception as e:
         mp4_path = map_img
-        logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
+        logger.info(e.with_traceback)
     res = upload_img(mp4_path)
     if res[0] == 1:
         return ['image', 'MediaId', res[1]]

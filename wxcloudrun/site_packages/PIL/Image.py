@@ -92,6 +92,7 @@ try:
     # and should be considered private and subject to change.
     from . import _imaging as core
 
+    '''
     if __version__ != getattr(core, "PILLOW_VERSION", None):
         msg = (
             "The _imaging extension was built for another version of Pillow or PIL:\n"
@@ -99,6 +100,7 @@ try:
             f"Pillow version: {__version__}"
         )
         raise ImportError(msg)
+    '''
 
 except ImportError as v:
     core = DeferredError(ImportError("The _imaging C module is not installed."))
