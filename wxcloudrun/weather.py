@@ -5,11 +5,19 @@ import requests
 import os
 import logging
 import numpy as np
-from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
 import imageio
-from wxcloudrun.site_packages.PIL import ImageDraw, Image
-
 logger = logging.getLogger('log')
+
+
+try:
+    from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
+except Exception as e:
+    logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
+try:
+    from wxcloudrun.site_packages.PIL import ImageDraw, Image
+except Exception as e:
+    logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
+
 
 # 微信云托管
 UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type=image'
@@ -42,7 +50,11 @@ def get_weather(location_x, location_y, scale):
     
     map_img = get_map(location_x, location_y, scale)
     radar_imgs = get_radar(location_x, location_y)
-    mp4_path = images2video(map_img, radar_imgs)
+    try:
+        mp4_path = images2video(map_img, radar_imgs)
+    except Exception as e:
+        mp4_path = map_img
+        logger.info('-------------------------\n', e.with_traceback, '---------------------\n')
     res = upload_img(mp4_path)
     if res[0] == 1:
         return ['image', 'MediaId', res[1]]
