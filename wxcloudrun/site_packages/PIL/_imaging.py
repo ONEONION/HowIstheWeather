@@ -10,11 +10,13 @@ class ImagingFont:
 class ImagingDraw:
     def __getattr__(self, name: str) -> Any: ...
 
+'''
 class PixelAccess:
     def __getitem__(self, xy: tuple[int, int]) -> float | tuple[int, ...]: ...
     def __setitem__(
         self, xy: tuple[int, int], color: float | tuple[int, ...]
     ) -> None: ...
+'''
 
 class ImagingDecoder:
     def __getattr__(self, name: str) -> Any: ...
