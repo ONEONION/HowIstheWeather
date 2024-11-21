@@ -5,7 +5,7 @@ import requests
 import os
 import logging
 import numpy as np
-from site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
+from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
 import imageio
 # from PIL import ImageDraw, Image
 
