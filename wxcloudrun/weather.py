@@ -20,7 +20,7 @@ except Exception as e:
 
 
 # 微信云托管
-UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type=image'
+UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type={}'
 AccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}'
 AccessToken = None
 # 高德地图
@@ -51,11 +51,13 @@ def get_weather(location_x, location_y, scale):
     map_img = get_map(location_x, location_y, scale)
     radar_imgs = get_radar(location_x, location_y)
     try:
-        mp4_path = images2video(map_img, radar_imgs)
+        file_path = images2video(map_img, radar_imgs)
+        file_type = 'video'
     except Exception as e:
-        mp4_path = map_img
+        file_path = map_img
+        file_type = 'image'
         logger.info(e.with_traceback)
-    res = upload_img(mp4_path)
+    res = upload_file(file_path, file_type)
     if res[0] == 1:
         return ['image', 'MediaId', res[1]]
     else:
@@ -125,22 +127,26 @@ def get_access_token():
     #    rsp = requests.get(AccessTokenUrl.format('wx6bb828210f8d7989', '8ac2dc63edc3a2cf6420508fbf6fe6de'))
         AccessToken = {'access_token': rsp.json()['access_token'], 
                     'expire_time': time.time() + rsp.json()['expires_in'] }
-    logger.info('get access_token')
+        logger.info('get access_token')
     return AccessToken['access_token']
 
 
-def upload_img(img_url):
-    # 上传图片作为临时素材到微信服务器
-    img = {
-        'media': open(img_url, 'rb'),
+def upload_file(file_url, file_type):
+    # 上传图片/视频作为临时素材到微信服务器
+    file = {
+        'media': open(file_url, 'rb'),
     }
     try:
-        rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
+        rsp = requests.post(UploadUrl.format(get_access_token(), file_type), files = file)
         logger.info('post request: '+ UploadUrl.format(get_access_token()))
     except Exception as e:
         logger.info(e.with_traceback)
-        return -1, '上传图片失败'
-    return 1, rsp.json()['media_id']
+        return -1, '上传素材失败'
+    try:
+        return 1, rsp.json()['media_id']
+    except Exception as e:
+        logger.info(rsp.json())
+        return -1, '上传素材失败'
     
 
 GetTicketUrl = 'https://h5.caiyunapp.com/api/ticket'
@@ -179,7 +185,7 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
-    background = modify_alpha(imageio.v2.imread(background_img))
+    background = modify_alpha(imageio.imread(background_img))
 
     frames= []
     for img in images:
