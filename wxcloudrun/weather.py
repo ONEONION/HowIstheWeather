@@ -138,7 +138,7 @@ def upload_file(file_url, file_type):
     }
     try:
         rsp = requests.post(UploadUrl.format(get_access_token(), file_type), files = file)
-        logger.info('post request: '+ UploadUrl.format(get_access_token()))
+        logger.info('post request: '+ UploadUrl.format(get_access_token(), file_type))
     except Exception as e:
         logger.info(e.with_traceback)
         return -1, '上传素材失败'
@@ -185,6 +185,7 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
+    '''
     background = modify_alpha(imageio.imread(background_img))
 
     frames= []
@@ -200,6 +201,8 @@ def images2video(background_img, images):
 
     clip = ImageSequenceClip(frames, fps=12)
     clip.write_videofile(MapSavePath+'output_video.mp4')
+    '''
+    raise KeyError
     
     return MapSavePath + 'output_video.mp4'
 
