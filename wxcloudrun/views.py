@@ -124,7 +124,7 @@ def weather(request, _):
         if res[0] == 'text':
             rspContent[res[1]] = res[2]
         else:
-            rspContent['Image'] = {
+            rspContent[res[0]] = {
                 res[1]: res[2],
             }
         data.content = '{},{},{}'.format(body['Location_X'], body['Location_Y'], body['Label'])

@@ -59,7 +59,7 @@ def get_weather(location_x, location_y, scale):
         logger.info(e.with_traceback)
     res = upload_file(file_path, file_type)
     if res[0] == 1:
-        return ['image', 'MediaId', res[1]]
+        return [file_type, 'MediaId', res[1]]
     else:
         return ['text', 'Content', res[1]]
 
@@ -185,24 +185,24 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
-    '''
-    background = modify_alpha(imageio.imread(background_img))
+    # background = modify_alpha(imageio.imread(background_img))
 
     frames= []
     for img in images:
         weather_img = Image.open(img['image'])
-        draw = ImageDraw.Draw(weather_img)
-        draw.text((340, 0), img['timestamp'], fill=(255, 255, 255))
+        # draw = ImageDraw.Draw(weather_img)
+        # draw.text((340, 0), img['timestamp'], fill=(255, 255, 255))
         weather_img.save(img['image'])
 
-        weather_img = imageio.imread(img['image'])
-        combined_img = (background + weather_img).astype(np.uint8)
-        frames.append(combined_img)
+        # weather_img = imageio.imread(img['image'])
+        # combined_img = (background + weather_img).astype(np.uint8)
+        # frames.append(combined_img)
+        frames.append()
 
     clip = ImageSequenceClip(frames, fps=12)
     clip.write_videofile(MapSavePath+'output_video.mp4')
-    '''
-    raise KeyError
+    
+    # raise KeyError
     
     return MapSavePath + 'output_video.mp4'
 

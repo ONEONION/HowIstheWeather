@@ -69,7 +69,7 @@ def __getattr__(name):
     raise AttributeError(msg)
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('log')
 
 
 class DecompressionBombWarning(RuntimeWarning):
@@ -837,6 +837,7 @@ class Image:
         :returns: An image access object.
         :rtype: :ref:`PixelAccess` or :py:class:`PIL.PyAccess`
         """
+        logger.info('into load')
         if self.im is not None and self.palette and self.palette.dirty:
             # realize palette
             mode, arr = self.palette.getdata()
