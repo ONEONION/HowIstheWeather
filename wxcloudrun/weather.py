@@ -185,6 +185,7 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
+    background = modify_alpha(np.asarray(Image.open(background_img)))
     # background = modify_alpha(imageio.imread(background_img))
 
     frames= []
