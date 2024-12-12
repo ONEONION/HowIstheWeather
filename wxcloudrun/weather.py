@@ -5,14 +5,29 @@ import requests
 import os
 import logging
 import numpy as np
+<<<<<<< HEAD
 # from moviepy.editor import ImageSequenceClip
 import imageio
 # from PIL import ImageDraw, Image
 
+=======
+import imageio
+>>>>>>> master
 logger = logging.getLogger('log')
 
+
+try:
+    from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
+except Exception as e:
+    logger.info(e.with_traceback)
+try:
+    from wxcloudrun.site_packages.PIL import ImageDraw, Image
+except Exception as e:
+    logger.info(e.with_traceback)
+
+
 # 微信云托管
-UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type=image'
+UploadUrl = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token={}&type={}'
 AccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}'
 AccessToken = None
 # 高德地图
@@ -40,6 +55,7 @@ def get_weather(location_x, location_y, scale):
     if weather_data['status'] != 'ok':
         return ['text', 'Content', weather_data['error']]
     
+<<<<<<< HEAD
     map_img_path = get_map(location_x, location_y, scale)
     res = upload_img(map_img_path)
     '''
@@ -48,8 +64,20 @@ def get_weather(location_x, location_y, scale):
     mp4_path = images2video(map_img, radar_imgs)
     res = upload_img(mp4_path)
     '''
+=======
+    map_img = get_map(location_x, location_y, scale)
+    radar_imgs = get_radar(location_x, location_y)
+    try:
+        file_path = images2video(map_img, radar_imgs)
+        file_type = 'video'
+    except Exception as e:
+        file_path = map_img
+        file_type = 'image'
+        logger.info(e.with_traceback)
+    res = upload_file(file_path, file_type)
+>>>>>>> master
     if res[0] == 1:
-        return ['image', 'MediaId', res[1]]
+        return [file_type, 'MediaId', res[1]]
     else:
         return ['text', 'Content', res[1]]
 
@@ -117,22 +145,33 @@ def get_access_token():
     #    rsp = requests.get(AccessTokenUrl.format('wx6bb828210f8d7989', '8ac2dc63edc3a2cf6420508fbf6fe6de'))
         AccessToken = {'access_token': rsp.json()['access_token'], 
                     'expire_time': time.time() + rsp.json()['expires_in'] }
-    logger.info('get access_token')
+        logger.info('get access_token')
     return AccessToken['access_token']
 
 
+<<<<<<< HEAD
 def upload_img(img_url):
     # 上传图片作为临时素材到微信服务器
     img = {
         'media': open(img_url, 'rb')
+=======
+def upload_file(file_url, file_type):
+    # 上传图片/视频作为临时素材到微信服务器
+    file = {
+        'media': open(file_url, 'rb'),
+>>>>>>> master
     }
     try:
-        rsp = requests.post(UploadUrl.format(get_access_token()), files = img)
-        logger.info('post request: '+ UploadUrl.format(get_access_token()))
+        rsp = requests.post(UploadUrl.format(get_access_token(), file_type), files = file)
+        logger.info('post request: '+ UploadUrl.format(get_access_token(), file_type))
     except Exception as e:
         logger.info(e.with_traceback)
-        return -1, '上传图片失败'
-    return 1, rsp.json()['media_id']
+        return -1, '上传素材失败'
+    try:
+        return 1, rsp.json()['media_id']
+    except Exception as e:
+        logger.info(rsp.json())
+        return -1, '上传素材失败'
     
 
 GetTicketUrl = 'https://h5.caiyunapp.com/api/ticket'
@@ -171,11 +210,17 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
+<<<<<<< HEAD
     background = modify_alpha(imageio.imread(background_img))
+=======
+    background = modify_alpha(np.asarray(Image.open(background_img)))
+    # background = modify_alpha(imageio.imread(background_img))
+>>>>>>> master
 
     frames= []
     for img in images:
         weather_img = Image.open(img['image'])
+<<<<<<< HEAD
         draw = ImageDraw.Draw(weather_img)
         draw.text((340, 0), img['timestamp'], fill=(0, 0, 0))
         weather_img.save(img['image'])
@@ -183,10 +228,25 @@ def images2video(background_img, images):
         weather_img = imageio.imread(img['image'])
         combined_img = (background + weather_img).astype(np.uint8)
         frames.append(combined_img)
+=======
+        # draw = ImageDraw.Draw(weather_img)
+        # draw.text((340, 0), img['timestamp'], fill=(255, 255, 255))
+        weather_img.save(img['image'])
+
+        # weather_img = imageio.imread(img['image'])
+        # combined_img = (background + weather_img).astype(np.uint8)
+        # frames.append(combined_img)
+        frames.append()
+>>>>>>> master
 
     clip = ImageSequenceClip(frames, fps=12)
     clip.write_videofile(MapSavePath+'output_video.mp4')
     
+<<<<<<< HEAD
+=======
+    # raise KeyError
+    
+>>>>>>> master
     return MapSavePath + 'output_video.mp4'
 
 
@@ -211,8 +271,13 @@ if __name__ == '__main__':
     print('get weather')
     # print(get_weather(39.849968, 116.401463, 12))
     # media_id = upload_img(get_map(39.629968, 116.401463, 15))
+<<<<<<< HEAD
     bg = get_map(40.0741, 113.2861, 12)
     radar_imgs = get_radar(40.0741, 113.2861)
+=======
+    bg = get_map(42.1606, 126.2953, 12)
+    radar_imgs = get_radar(42.1606, 126.2953)
+>>>>>>> master
     # radar_imgs = [{'image': './wxcloudrun/maps/forecast_img_0.png', 'timestamp': '2024-10-11 15:31:02'}, {'image': './wxcloudrun/maps/forecast_img_1.png', 'timestamp': '2024-10-11 15:36:49'}, {'image': './wxcloudrun/maps/forecast_img_2.png', 'timestamp': '2024-10-11 15:42:36'}, {'image': './wxcloudrun/maps/forecast_img_3.png', 'timestamp': '2024-10-11 15:48:23'}, {'image': './wxcloudrun/maps/forecast_img_4.png', 'timestamp': '2024-10-11 15:54:10'}, {'image': './wxcloudrun/maps/forecast_img_5.png', 'timestamp': '2024-10-11 15:59:57'}, {'image': './wxcloudrun/maps/forecast_img_6.png', 'timestamp': '2024-10-11 16:05:44'}, {'image': './wxcloudrun/maps/forecast_img_7.png', 'timestamp': '2024-10-11 16:11:31'}, {'image': './wxcloudrun/maps/forecast_img_8.png', 'timestamp': '2024-10-11 16:17:18'}, {'image': './wxcloudrun/maps/forecast_img_9.png', 'timestamp': '2024-10-11 16:23:05'}, {'image': './wxcloudrun/maps/forecast_img_10.png', 'timestamp': '2024-10-11 16:28:52'}, {'image': './wxcloudrun/maps/forecast_img_11.png', 'timestamp': '2024-10-11 16:34:39'}, {'image': './wxcloudrun/maps/forecast_img_12.png', 'timestamp': '2024-10-11 16:40:26'}, {'image': './wxcloudrun/maps/forecast_img_13.png', 'timestamp': '2024-10-11 16:46:13'}, {'image': './wxcloudrun/maps/forecast_img_14.png', 'timestamp': '2024-10-11 16:52:00'}, {'image': './wxcloudrun/maps/forecast_img_15.png', 'timestamp': '2024-10-11 16:57:47'}, {'image': './wxcloudrun/maps/forecast_img_16.png', 'timestamp': '2024-10-11 17:03:34'}, {'image': './wxcloudrun/maps/forecast_img_17.png', 'timestamp': '2024-10-11 17:09:21'}, {'image': './wxcloudrun/maps/forecast_img_18.png', 'timestamp': '2024-10-11 17:15:08'}, {'image': './wxcloudrun/maps/forecast_img_19.png', 'timestamp': '2024-10-11 17:20:55'}, {'image': './wxcloudrun/maps/forecast_img_20.png', 'timestamp': '2024-10-11 17:26:42'}, {'image': './wxcloudrun/maps/forecast_img_21.png', 'timestamp': '2024-10-11 17:32:29'}, {'image': './wxcloudrun/maps/forecast_img_22.png', 'timestamp': '2024-10-11 17:38:16'}, {'image': './wxcloudrun/maps/forecast_img_23.png', 'timestamp': '2024-10-11 17:44:03'}, {'image': './wxcloudrun/maps/forecast_img_24.png', 'timestamp': '2024-10-11 17:49:50'}, {'image': './wxcloudrun/maps/forecast_img_25.png', 'timestamp': '2024-10-11 17:55:37'}]
     # bg = MapSavePath + 'map_img.png'
     print(images2video(bg, radar_imgs))
