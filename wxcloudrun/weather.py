@@ -5,16 +5,16 @@ import requests
 import os
 import logging
 import numpy as np
-# from moviepy.editor import ImageSequenceClip
+from moviepy.editor import ImageSequenceClip
 import imageio
 from PIL import ImageDraw, Image
 logger = logging.getLogger('log')
 
 
-try:
-    from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
-except Exception as e:
-    logger.info(e.with_traceback)
+#try:
+#    from wxcloudrun.site_packages.moviepy.ImageSequenceClip import ImageSequenceClip
+#except Exception as e:
+#    logger.info(e.with_traceback)
 # try:
 #    from wxcloudrun.site_packages.PIL import ImageDraw, Image
 #except Exception as e:
@@ -187,8 +187,8 @@ def get_radar(location_x, location_y):
 def images2video(background_img, images):
     # background_img是图片地址
     # images是元素为{'image':图片地址, 'timestamp': 时间戳}的数组
-    background = modify_alpha(np.asarray(Image.open(background_img)))
-    # background = modify_alpha(imageio.imread(background_img))
+    # background = modify_alpha(np.asarray(Image.open(background_img)))
+    background = modify_alpha(imageio.imread(background_img))
 
     frames= []
     for img in images:
@@ -200,11 +200,11 @@ def images2video(background_img, images):
         weather_img = np.asarray(weather_img)
         combined_img = (background + weather_img).astype(np.uint8)
         frames.append(combined_img)
-        # frames.append()
+        # frames.append(img['image'])
 
-    logger.info(len(frames))
-    # clip = ImageSequenceClip(frames, fps=12)
-    # clip.write_videofile(MapSavePath+'output_video.mp4')
+    # logger.info(len(frames))
+    clip = ImageSequenceClip(frames, fps=12)
+    clip.write_videofile(MapSavePath+'output_video.mp4')
     
     # raise KeyError
     
